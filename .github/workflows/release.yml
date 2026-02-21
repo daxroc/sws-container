@@ -116,3 +116,18 @@ jobs:
             -t ${{ env.IMAGE_NAME }}:${{ needs.check.outputs.tag }} \
             -t ${{ env.IMAGE_NAME }}:latest \
             $(printf '${{ env.IMAGE_NAME }}@sha256:%s ' *)
+
+  update-description:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: dcroche/sws-container
+          readme-filepath: ./README.md

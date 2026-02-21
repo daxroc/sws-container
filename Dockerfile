@@ -25,6 +25,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     curl \
     httpie \
+    iftop \
+    nethogs \
+    whois \
+    ipcalc \
+    iputils-arping \
+    hping3 \
     # --- Filesystem ---
     nfs-common \
     rpcbind \
@@ -43,6 +49,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     file \
     ncdu \
     rsync \
+    fio \
+    inotify-tools \
     # --- Process ---
     procps \
     htop \
@@ -52,6 +60,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gdb \
     linux-tools-common \
     util-linux \
+    stress-ng \
+    pv \
+    atop \
+    dstat \
     # --- General ---
     vim \
     less \
@@ -62,7 +74,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tmux \
     git \
     python3 \
-    && rm -rf /var/lib/apt/lists/*
+    openssh-client \
+    unzip \
+    zip \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/* \
+    && ARCH=$(dpkg --print-architecture) \
+    && curl -fsSL "https://dl.k8s.io/release/$(curl -fsSL https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl" \
+       -o /usr/local/bin/kubectl \
+    && chmod +x /usr/local/bin/kubectl
 
 WORKDIR /workspace
 

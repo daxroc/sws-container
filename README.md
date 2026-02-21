@@ -16,10 +16,17 @@ A general-purpose Docker debug container for troubleshooting network, filesystem
 | `tcpdump`, `tshark` | Packet capture & analysis |
 | `nmap` | Port scanning & service discovery |
 | `iperf3` | Bandwidth testing |
+| `iftop` | Real-time per-connection bandwidth |
+| `nethogs` | Per-process network bandwidth |
 | `ethtool` | NIC diagnostics |
+| `brctl` | Bridge utilities |
 | `iptables`, `conntrack` | Firewall & connection tracking |
+| `arping` | ARP-level ping & duplicate IP detection |
+| `hping3` | TCP/IP packet crafting & analysis |
 | `curl`, `wget`, `httpie` | HTTP clients |
 | `openssl` | TLS/SSL inspection |
+| `whois` | Domain & IP ownership lookup |
+| `ipcalc` | IP/subnet calculator |
 
 ### Filesystem
 
@@ -29,12 +36,14 @@ A general-purpose Docker debug container for troubleshooting network, filesystem
 | `showmount`, `mount.nfs`, `nfsstat` | NFS debugging |
 | `rpcbind`, `rpcinfo` | RPC service inspection |
 | `mount.cifs` | SMB/CIFS mounts |
-| `sshfs` | FUSE-based SSH mounts |
+| `sshfs` | FUSE-based SSH mounts (FUSE3) |
 | `lsof` | Open file handles |
 | `fdisk`, `gdisk`, `parted` | Partition tables |
 | `e2fsprogs`, `xfsprogs`, `dosfstools` | Filesystem utilities |
 | `ncdu` | Disk usage analysis |
 | `rsync` | File synchronization |
+| `fio` | Flexible I/O tester & benchmarking |
+| `inotifywait`, `inotifywatch` | Filesystem event monitoring |
 | `tree`, `file` | Directory & file inspection |
 
 ### Process
@@ -42,9 +51,13 @@ A general-purpose Docker debug container for troubleshooting network, filesystem
 | Tool | Description |
 |---|---|
 | `ps`, `top`, `htop` | Process monitoring |
+| `atop` | Advanced system & process monitor |
 | `strace`, `ltrace` | Syscall & library call tracing |
 | `gdb` | Debugger |
 | `iostat`, `sar`, `mpstat` | System performance stats |
+| `dstat` | Versatile resource stats |
+| `stress-ng` | System stress testing |
+| `pv` | Pipe throughput monitor |
 | `lsns`, `nsenter` | Namespace inspection |
 
 ### General
@@ -56,12 +69,22 @@ A general-purpose Docker debug container for troubleshooting network, filesystem
 | `tmux` | Terminal multiplexer |
 | `git` | Version control |
 | `python3` | Scripting |
+| `ssh`, `scp` | Remote access |
+| `zip`, `unzip` | Archive handling |
+| `gpg` | Key & signature management |
+| `bash-completion`, `man` | Shell productivity |
+
+### Kubernetes
+
+| Tool | Description |
+|---|---|
+| `kubectl` | Kubernetes CLI |
 
 ## Quick Start
 
 ```bash
-# Build
-make build
+# Pull from Docker Hub
+docker pull dcroche/sws-container
 
 # Run interactively
 docker run -it --privileged dcroche/sws-container
@@ -71,6 +94,14 @@ docker run -it dcroche/sws-container
 ```
 
 > `--privileged` is required for operations like mounting filesystems, tracing processes, or inspecting network interfaces. For basic inspection you can omit it.
+
+The default working directory inside the container is `/workspace`.
+
+To build locally (single-platform, loads into local Docker):
+
+```bash
+docker buildx build --load -t dcroche/sws-container .
+```
 
 ## Common Debugging Commands
 
@@ -190,16 +221,49 @@ kubectl run sws-debug --rm -it \
 
 This gives full access to the host filesystem (`/host`), network, and process namespace — useful for inspecting mounts, networking, and kernel-level state on the node.
 
-## Publish
+## Image
+
+| | |
+|---|---|
+| **Registry** | [Docker Hub](https://hub.docker.com/r/dcroche/sws-container) |
+| **Base** | Ubuntu 24.04 |
+| **Platforms** | `linux/amd64`, `linux/arm64` |
+| **Tags** | `latest`, `<version>` (e.g. `0.3.0`), `<version>-alpha` |
+| **Supply chain** | SBOM and provenance attestations included |
 
 ```bash
-# Login to Docker Hub
-docker login
+docker pull dcroche/sws-container:latest
+```
 
-# Build and push
+## Versioning
+
+The version is tracked in the `VERSION` file and drives all image tags and git tags.
+
+- Bump `VERSION` in your PR to set the next release number.
+- On merge to `main`, CI creates a git tag `v<version>` and pushes the versioned + `latest` images.
+- PR builds automatically publish an alpha image tagged `<version>-alpha`.
+
+## CI/CD
+
+Two GitHub Actions workflows automate builds:
+
+- **PR Build** (`.github/workflows/pr.yml`) — on pull request to `main`, builds and pushes a multi-arch alpha image (`<version>-alpha`).
+- **Release** (`.github/workflows/release.yml`) — on push to `main`, creates a git tag and pushes versioned + `latest` multi-arch images to Docker Hub. Skips if the tag already exists.
+
+Both workflows produce SBOM and provenance attestations.
+
+## Release Process
+
+### Automated (recommended)
+
+1. Bump the `VERSION` file in your PR.
+2. Merge to `main` — CI handles tagging and publishing.
+
+### Manual
+
+```bash
+docker login
 make publish
 ```
 
-## Image
-
-`dcroche/sws-container:latest`
+This builds and pushes the multi-arch image, then creates and pushes a git tag.

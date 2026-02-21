@@ -226,6 +226,8 @@ This gives full access to the host filesystem (`/host`), network, and process na
 | | |
 |---|---|
 | **Registry** | [Docker Hub](https://hub.docker.com/r/dcroche/sws-container) |
+| **Source** | [GitHub](https://github.com/daxroc/sws-container) |
+| **Dockerfile** | [Dockerfile](https://github.com/daxroc/sws-container/blob/main/Dockerfile) |
 | **Base** | Ubuntu 24.04 |
 | **Platforms** | `linux/amd64`, `linux/arm64` |
 | **Tags** | `latest`, `<version>` (e.g. `0.3.0`), `<version>-alpha` |

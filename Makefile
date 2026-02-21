@@ -4,7 +4,9 @@ TAG        := $(VERSION)
 PLATFORMS  := linux/amd64,linux/arm64
 
 .DEFAULT_GOAL := help
-.PHONY: help build push publish clean buildx-setup tag
+ALPHA_TAG  := $(VERSION)-alpha
+
+.PHONY: help build push publish clean buildx-setup tag alpha alpha-push
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -24,6 +26,18 @@ push: buildx-setup ## Build and push multi-platform image to Docker Hub
 		--sbom=true \
 		--provenance=mode=max \
 		-t $(IMAGE_NAME):$(TAG) -t $(IMAGE_NAME):latest --push .
+
+alpha: buildx-setup ## Build multi-platform alpha image
+	docker buildx build --platform $(PLATFORMS) \
+		--sbom=true \
+		--provenance=mode=max \
+		-t $(IMAGE_NAME):$(ALPHA_TAG) .
+
+alpha-push: buildx-setup ## Build and push alpha image to Docker Hub
+	docker buildx build --platform $(PLATFORMS) \
+		--sbom=true \
+		--provenance=mode=max \
+		-t $(IMAGE_NAME):$(ALPHA_TAG) --push .
 
 tag: ## Create a git tag for the current version
 	git tag -a v$(VERSION) -m "Release v$(VERSION)"

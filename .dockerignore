@@ -1,0 +1,10 @@
+.git
+.gitignore
+.DS_Store
+README.md
+Makefile
+VERSION
+*.md
+*.swp
+*.swo
+*~
